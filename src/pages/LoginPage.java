@@ -41,7 +41,7 @@ public class LoginPage {
 		
 		
 		// validation
-		loginBtn.setOnAction(e -> validateLogin(emailField.getText(), passwordField.getText()));
+		loginBtn.setOnMouseClicked(e -> validateLogin(emailField.getText(), passwordField.getText()));
 		
 		return loginForm;
 	}
@@ -53,7 +53,7 @@ public class LoginPage {
 		
 		// if any field is empty
 		if(email.isEmpty() || password.isEmpty()) {
-			warningAlert.setContentText("Email and Password must be filled");
+			warningAlert.setContentText("Email and Password must be filled!");
 			warningAlert.show();
 		}
 		// check if user is in db or not
@@ -62,12 +62,13 @@ public class LoginPage {
 			userTable = Database.fetchUser();
 			for (User u : userTable) {
 				if(u.userEmail.equals(email) && u.userPassword.equals(password)) {
+					Main.loggedInUser = u;
 					if(u.userRole.equals("User")) Main.home();
 					else Main.manageProduct();
 					return;
 				}
 			}
-			warningAlert.setContentText("Wrong Email or Password");
+			warningAlert.setContentText("Wrong Email or Password!");
 			warningAlert.show();
 		}
 		return;

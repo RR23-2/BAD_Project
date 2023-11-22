@@ -5,8 +5,12 @@ import javafx.scene.Scene;
 import javafx.scene.control.MenuBar;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import objects.User;
+import pages.CartPage;
 import pages.GlobalMenuBar;
+import pages.HomePage;
 import pages.LoginPage;
+import pages.RegisterPage;
 
 public class Main extends Application{
 	
@@ -14,6 +18,9 @@ public class Main extends Application{
 	static Stage stage = new Stage();
 	Scene mainScene = new Scene(mainPane, 750, 750);
 	static MenuBar globalMenuBar = GlobalMenuBar.globalMenuBar();
+	
+	// logged in user
+	public static User loggedInUser = null;
 	
 	public void initScene() {
 		// set global menubar for mainPane
@@ -35,11 +42,14 @@ public class Main extends Application{
 		globalMenuBar.getMenus().get(0).setVisible(true);
 		globalMenuBar.getMenus().get(1).setVisible(false);
 		globalMenuBar.getMenus().get(2).setVisible(false);	
+		mainPane.setCenter(RegisterPage.registerPage());
 		stage.setTitle("Register");
 	}
 	
 	public static void logout() {
 		// log out
+		login();
+		loggedInUser = null;
 	}
 	
 	// user
@@ -48,6 +58,8 @@ public class Main extends Application{
 		globalMenuBar.getMenus().get(0).setVisible(false);
 		globalMenuBar.getMenus().get(1).setVisible(true);
 		globalMenuBar.getMenus().get(2).setVisible(false);
+		mainPane.setCenter(HomePage.homePage());
+		stage.setTitle("Home");
 		
 	}
 	
@@ -56,6 +68,8 @@ public class Main extends Application{
 		globalMenuBar.getMenus().get(0).setVisible(false);
 		globalMenuBar.getMenus().get(1).setVisible(true);
 		globalMenuBar.getMenus().get(2).setVisible(false);
+		mainPane.setCenter(CartPage.cartPage());
+		stage.setTitle("Cart");
 	}
 	
 	public static void history() {
