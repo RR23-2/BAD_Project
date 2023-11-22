@@ -7,20 +7,30 @@ import scenes.LoginScene;
 
 public class Main extends Application{
 	
-	Scene mainScene;
+	static Scene mainScene;
 	
 	public static void main(String[] args) {
 		launch(args);
 	}
 	
-	public void Login(Stage stage) {
-		mainScene = LoginScene.loginScene();
+	public static void login(Stage stage) {
+		mainScene = LoginScene.loginScene(stage);
 		stage.setTitle("Login");
+	}
+	
+	public static void home(Stage stage) {
+		
+		stage.setTitle("Home");
+	}
+	
+	public static void editProduct(Stage stage) {
+		
+		stage.setTitle("Edit Product");
 	}
 	
 	@Override
 	public void start(Stage stage) throws Exception {
-		Login(stage);
+		login(stage);
 		stage.setScene(mainScene);
 		stage.show();
 	}
