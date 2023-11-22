@@ -1,29 +1,24 @@
-package scenes;
+package pages;
 
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import javafx.stage.Stage;
 import main.Main;
 import objects.User;
 import java.util.ArrayList;
 
 import database.Database;
 
-public class LoginScene {
+public class LoginPage {
 	
-	public static Scene loginScene(Stage stage) {
-		BorderPane loginPane = new BorderPane();
-		
+	public static VBox loginPage() {
 		// login form components
 		VBox loginForm = new VBox();
 		HBox loginLblBox = new HBox();
@@ -44,17 +39,14 @@ public class LoginScene {
 		loginForm.getChildren().addAll(loginLblBox, emailLbl, emailField, passwordLbl, passwordField, loginBtn);
 		loginForm.setMaxSize(300, 300);
 		
-		// set form to pane
-		loginPane.setCenter(loginForm);
 		
 		// validation
-		loginBtn.setOnAction(e -> validateLogin(emailField.getText(), passwordField.getText(), stage));
+		loginBtn.setOnAction(e -> validateLogin(emailField.getText(), passwordField.getText()));
 		
-		Scene loginScene = new Scene(loginPane, 750, 750);
-		return loginScene;
+		return loginForm;
 	}
 	
-	private static void validateLogin(String email, String password, Stage stage) {
+	private static void validateLogin(String email, String password) {
 		Alert warningAlert = new Alert(AlertType.WARNING);
 		warningAlert.setTitle("Warning");
 		warningAlert.setHeaderText("Warning");
@@ -70,8 +62,8 @@ public class LoginScene {
 			userTable = Database.fetchUser();
 			for (User u : userTable) {
 				if(u.userEmail.equals(email) && u.userPassword.equals(password)) {
-					if(u.userRole.equals("User")) Main.home(stage);
-					else Main.editProduct(stage);
+					if(u.userRole.equals("User")) Main.home();
+					else Main.manageProduct();
 					return;
 				}
 			}
