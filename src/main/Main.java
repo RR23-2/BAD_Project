@@ -8,15 +8,17 @@ import javafx.stage.Stage;
 import objects.User;
 import pages.CartPage;
 import pages.GlobalMenuBar;
+import pages.HistoryPage;
 import pages.HomePage;
 import pages.LoginPage;
 import pages.RegisterPage;
+import pages.TransactionCard;
 
 public class Main extends Application{
 	
 	static BorderPane mainPane = new BorderPane();
 	static Stage stage = new Stage();
-	Scene mainScene = new Scene(mainPane, 750, 750);
+	static Scene mainScene = new Scene(mainPane, 1000, 1000);
 	static MenuBar globalMenuBar = GlobalMenuBar.globalMenuBar();
 	
 	// logged in user
@@ -72,11 +74,23 @@ public class Main extends Application{
 		stage.setTitle("Cart");
 	}
 	
+	public static void transactionCard() {
+		mainPane.setTop(null);
+		mainPane.setCenter(TransactionCard.transactionCard());
+	}
+	
+	public static void doneTransaction() {
+		mainPane.setTop(globalMenuBar);
+		cart();
+	}
+	
 	public static void history() {
 		// direct to history page
 		globalMenuBar.getMenus().get(0).setVisible(false);
 		globalMenuBar.getMenus().get(1).setVisible(true);
 		globalMenuBar.getMenus().get(2).setVisible(false);
+		mainPane.setCenter(HistoryPage.historyPage());
+		stage.setTitle("My History");
 	}
 	
 	// admin

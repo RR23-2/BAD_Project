@@ -7,8 +7,11 @@ import javafx.collections.ObservableList;
 import main.Main;
 import objects.CartProduct;
 import objects.Product;
+import objects.Transaction;
+import objects.TransactionDetail;
 import objects.User;
 import java.sql.*;
+import java.time.LocalDate;
 
 public class Database {
 	
@@ -189,5 +192,144 @@ public class Database {
         catch (Exception exception) {
             System.out.println(exception);
         }
+	}
+	
+	// fetch all cart for check out
+	public static ArrayList<CartProduct> fetchCheckout(){
+		ArrayList<CartProduct> cartTable = new ArrayList<>();
+		
+		Connection connection = null;
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/CLminton", "root", "");
+ 
+            Statement statement;
+            statement = connection.createStatement();
+            ResultSet resultSet;
+            resultSet = statement.executeQuery(String.format("select mp.ProductID, ProductName, ProductMerk, ProductPrice, Quantity from msproduct mp join carttable ct on mp.ProductID = ct.ProductID where ct.UserID like '%s'", Main.loggedInUser.userID));
+            
+            String productID, productName, productBrand;
+        	int productPrice, quantity;
+            while (resultSet.next()) {
+            	productID = resultSet.getString("ProductID");
+            	productName = resultSet.getString("ProductName");
+            	productBrand = resultSet.getString("ProductMerk");
+            	productPrice = resultSet.getInt("ProductPrice");
+            	quantity = resultSet.getInt("Quantity");
+                cartTable.add(new CartProduct(productID, productName, productBrand, productPrice, quantity));
+            }
+            resultSet.close();
+            statement.close();
+            connection.close();
+        }
+        catch (Exception exception) {
+            System.out.println(exception);
+        }
+		
+		return cartTable;
+	}
+	
+	// checkout
+	public static void checkout(LocalDate curDate, boolean insurance, String courier) {
+		Connection connection = null;
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/CLminton", "root", "");
+ 
+            Statement statement;
+            statement = connection.createStatement();
+            ResultSet resultSet;
+            resultSet = statement.executeQuery("select count(*) as 'TrCount' from transactionheader");
+            int trCount = 0;
+            while(resultSet.next()) {
+            	trCount = resultSet.getInt("TrCount");
+            }
+            String transactionID = "TH" + String.format("%03d", (trCount + 1));
+            
+            statement.executeUpdate(String.format("insert into transactionheader values('%s', '%s', '%s', %s, '%s')", transactionID, Main.loggedInUser.userID, curDate, String.valueOf(insurance), courier));
+            
+            ArrayList<CartProduct> checkedOut = fetchCheckout();
+            
+            for(CartProduct cp : checkedOut) {
+            	statement.executeUpdate(String.format("insert into transactiondetail values('%s', '%s', %d)", cp.productID, transactionID, cp.quantity));
+            }
+            
+            statement.executeUpdate(String.format("delete from carttable where UserID like '%s'", Main.loggedInUser.userID));
+            
+            resultSet.close();
+            statement.close();
+            connection.close();
+        }
+        catch (Exception exception) {
+            System.out.println(exception);
+        }
+        Main.doneTransaction();
+	}
+
+	// fetch user's transaction
+	public static ObservableList<Transaction> fetchUserTransaction() {
+		ObservableList<Transaction> userTransactionTable = 	FXCollections.observableArrayList();
+
+		
+		Connection connection = null;
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/CLminton", "root", "");
+ 
+            Statement statement;
+            statement = connection.createStatement();
+            ResultSet resultSet;
+            resultSet = statement.executeQuery(String.format("select TransactionID, UserEmail, TransactionDate from transactionheader th join msuser mu on th.UserID = mu.UserID where mu.UserID like '%s'", Main.loggedInUser.userID));
+            
+            String transactionID, userEmail, transactionDate;
+            while (resultSet.next()) {
+            	transactionID = resultSet.getString("TransactionID");
+            	userEmail = resultSet.getString("UserEmail");
+            	transactionDate = resultSet.getString("TransactionDate");
+            	userTransactionTable.add(new Transaction(transactionID, userEmail, transactionDate));
+            }
+            resultSet.close();
+            statement.close();
+            connection.close();
+        }
+        catch (Exception exception) {
+            System.out.println(exception);
+        }
+		
+		return userTransactionTable;
+	}
+
+	// fetch transaction detail by id
+	public static ObservableList<TransactionDetail> fetchTransactionDetail(String transactionID){
+		ObservableList<TransactionDetail> transactionDetailTable = FXCollections.observableArrayList();
+		
+		Connection connection = null;
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/CLminton", "root", "");
+ 
+            Statement statement;
+            statement = connection.createStatement();
+            ResultSet resultSet;
+            resultSet = statement.executeQuery(String.format("select TransactionID, ProductName, ProductPrice, Quantity, Quantity * ProductPrice as 'TotalPrice' from transactiondetail tc join msproduct mp on tc.ProductID = mp.ProductID where TransactionID like '%s'", transactionID));
+            
+            String productName;
+            int productPrice, productQuantity, totalPrice;
+            while (resultSet.next()) {
+            	productName = resultSet.getString("ProductName");
+            	productPrice = resultSet.getInt("ProductPrice");
+            	productQuantity = resultSet.getInt("Quantity");
+            	totalPrice = resultSet.getInt("TotalPrice");
+            	transactionDetailTable.add(new TransactionDetail(transactionID, productName, productPrice, productQuantity, totalPrice));
+            }
+            resultSet.close();
+            statement.close();
+            connection.close();
+        }
+        catch (Exception exception) {
+            System.out.println(exception);
+        }
+		
+		return transactionDetailTable;
 	}
 }

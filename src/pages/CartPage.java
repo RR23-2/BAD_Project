@@ -97,7 +97,9 @@ public class CartPage {
 			warningAlert.setContentText("Please insert item to your cart");
 			warningAlert.show();
 		}
-		// else direct to checkout
+		else {
+			Main.transactionCard();
+		}
 	}
 	
 	private static void deleteProduct(CartProduct cartProduct) {
